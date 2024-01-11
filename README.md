@@ -31,4 +31,8 @@ flutter run -d linux
 
 El projecte Flutter ha de tenir permisos de xarxa, això es configura a cada carpeta de sistema segons cal.
 
-Per exemple, a macOS cal obrir el projecte de la carpeta 'macos/Runner.xcodeproj' amb Xcode i a la secció 'Signing & Capabilities' seleccionar els permisos de xarxa tant en mode 'Debug' com en mode 'Release'.
+També ha de tenir permisos per tal que l'usuari trii un arxiu i per enviar-lo al servidor amb POST.
+
+Per exemple, a macOS cal obrir el projecte de la carpeta 'macos/Runner.xcodeproj' amb Xcode i a la secció 'Signing & Capabilities' seleccionar:
+- Els permisos de xarxa tant en mode 'Debug' com en mode 'Release'
+- Els permisos 'File Access Type' a 'User selected file'
