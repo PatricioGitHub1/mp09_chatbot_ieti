@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class AppData with ChangeNotifier {
   // Access appData globaly with:
@@ -18,10 +20,16 @@ class AppData with ChangeNotifier {
   dynamic dataPost;
   dynamic dataFile;
 
-  Future<String> loadHttpByChunks(String url) async {
+  // Funció per fer crides tipus 'GET' i agafar la informació a mida que es va rebent
+  Future<String> loadHttpGetByChunks(String url) async {
     var httpClient = HttpClient();
     var completer = Completer<String>();
     String result = "";
+
+    // If development, wait 1 second to simulate a delay
+    if (!kReleaseMode) {
+      await Future.delayed(const Duration(seconds: 1));
+    }
 
     try {
       var request = await httpClient.getUrl(Uri.parse(url));
@@ -37,51 +45,93 @@ class AppData with ChangeNotifier {
         },
         onError: (error) {
           completer.completeError(
-              "Error del servidor (appData/loadHttpChunks): $error");
+              "Error del servidor (appData/loadHttpGetByChunks): $error");
         },
       );
     } catch (e) {
-      completer.completeError("Excepció (appData/loadHttpChunks): $e");
+      completer.completeError("Excepció (appData/loadHttpGetByChunks): $e");
     }
 
     return completer.future;
   }
 
-  // Load data from '.json' file
-  void load(String type) async {
+  // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
+  //i agafar la informació a mida que es va rebent
+  Future<String> loadHttpPostByChunks(String url, File file) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    // Afegir les dades JSON com a part del formulari
+    request.fields['data'] = '{"type":"test"}';
+
+    // Adjunta l'arxiu com a part del formulari
+    var stream = http.ByteStream(file.openRead());
+    var length = await file.length();
+    var multipartFile = http.MultipartFile('file', stream, length,
+        filename: file.path.split('/').last,
+        contentType: MediaType('application', 'octet-stream'));
+    request.files.add(multipartFile);
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      // La sol·licitud ha estat exitosa
+      var responseData = await response.stream.toBytes();
+      var responseString = utf8.decode(responseData);
+      return responseString;
+    } else {
+      // La sol·licitud ha fallat
+      throw Exception(
+          "Error del servidor (appData/loadHttpPostByChunks): ${response.reasonPhrase}");
+    }
+  }
+
+  // Funció per fer carregar dades d'un arxiu json de la carpeta 'assets'
+  Future<dynamic> readJsonAsset(String filePath) async {
+    // If development, wait 1 second to simulate a delay
+    if (!kReleaseMode) {
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    try {
+      var jsonString = await rootBundle.loadString(filePath);
+      final jsonData = json.decode(jsonString);
+      return jsonData;
+    } catch (e) {
+      throw Exception("Excepció (appData/readJsonAsset): $e");
+    }
+  }
+
+  // Carregar dades segons el tipus que es demana
+  void load(String type, {File? selectedFile}) async {
     switch (type) {
       case 'GET':
         loadingGet = true;
         notifyListeners();
 
-        // If development, wait 1 second to simulate a delay
-        if (!kReleaseMode) {
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        dataGet = await loadHttpByChunks(
+        dataGet = await loadHttpGetByChunks(
             'http://localhost:3000/llistat?cerca=motos&color=vermell');
+
         loadingGet = false;
         notifyListeners();
+        break;
+      case 'POST':
+        loadingPost = true;
+        notifyListeners();
 
+        dataPost = await loadHttpPostByChunks(
+            'http://localhost:3000/data', selectedFile!);
+
+        loadingPost = false;
+        notifyListeners();
         break;
       case 'FILE':
         loadingFile = true;
         notifyListeners();
 
-        // If development, wait 1 second to simulate a delay
-        if (!kReleaseMode) {
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        // Load data from file
-        var file = "assets/data/example.json";
-        var fileText = await rootBundle.loadString(file);
-        var fileData = json.decode(fileText);
+        var fileData = await readJsonAsset("assets/data/example.json");
 
         loadingFile = false;
         dataFile = fileData;
-
         notifyListeners();
         break;
     }
