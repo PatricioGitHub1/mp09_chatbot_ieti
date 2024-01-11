@@ -18,7 +18,7 @@ class AppData with ChangeNotifier {
   dynamic dataPost;
   dynamic dataFile;
 
-  Future<String> loadHttpChunks(String url) async {
+  Future<String> loadHttpByChunks(String url) async {
     var httpClient = HttpClient();
     var completer = Completer<String>();
     String result = "";
@@ -59,7 +59,7 @@ class AppData with ChangeNotifier {
           await Future.delayed(const Duration(seconds: 1));
         }
 
-        dataGet = await loadHttpChunks(
+        dataGet = await loadHttpByChunks(
             'http://localhost:3000/llistat?cerca=motos&color=vermell');
         loadingGet = false;
         notifyListeners();
