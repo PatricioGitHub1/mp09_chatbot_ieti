@@ -88,6 +88,14 @@ app.post('/data', upload.single('file'), async (req, res) => {
     return
   }
 
+  // Aquí s'executen totes les accions necessaries
+  // però tenint en compte el tipus de petició 
+  // (en aquest exemple només 'test')
+
+  // A l'exercici 'XatIETI' hi hauràn dos tipus de petició:
+  // - 'conversa' que retornara una petició generada per 'mistral'
+  // - 'imatge' que retornara una imatge generada per 'llava'
+
   if (objPost.type === 'test') {
     if (uploadedFile) {
       let fileContent = uploadedFile.buffer.toString('utf-8')
