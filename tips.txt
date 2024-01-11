@@ -1,0 +1,14 @@
+Path:
+export PATH="$PATH:${HOME}/Documents/Projects/flutter/flutter/bin/"
+
+
+Exemple d'iniciar el projecte:
+cd flutter_postget
+flutter clean
+flutter create . --platform macos
+flutter create . --platform web
+rm -r test
+
+Altres utils:
+
+flutter run -d macos --enable-impeller
