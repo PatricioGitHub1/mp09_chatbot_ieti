@@ -108,6 +108,9 @@ class AppData with ChangeNotifier {
         loadingGet = true;
         notifyListeners();
 
+        // TODO: Cal modificar el funcionament d'aquí
+        // per tal d'actualitzar el valor de 'dataGet' a mida que es va rebent
+        // la informació del servidor, enlloc de mostrar 'Loading ...'
         dataGet = await loadHttpGetByChunks(
             'http://localhost:3000/llistat?cerca=motos&color=vermell');
 
