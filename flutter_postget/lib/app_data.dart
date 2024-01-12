@@ -134,9 +134,25 @@ class AppData with ChangeNotifier {
         var fileData = await readJsonAsset("assets/data/example.json");
 
         loadingFile = false;
+        switch (type) {
+          case 'conversa':
+            break;
+          case 'imatge':
+            break;
+          default:
+        }
         dataFile = fileData;
         notifyListeners();
         break;
+    }
+  }
+
+  // Funcion para enviar al server del chatbot
+  void sendBackend(String textBody, {File? selectedFile}) {
+    if (selectedFile == null && textBody.isNotEmpty) {
+      print("tipus conversa");
+    } else if (selectedFile != null && textBody.isEmpty) {
+      print("tienes que añadir descripcion a la imagen");
     }
   }
 }
