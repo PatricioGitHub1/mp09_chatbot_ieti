@@ -112,3 +112,28 @@ app.post('/data', upload.single('file'), async (req, res) => {
     res.status(400).send('Sol·licitud incorrecta.')
   }
 })
+
+
+// curl -X POST -F "data={\"type\":\"conversa\"}" -F "file=@package.json" http://localhost:3000/prueba
+app.post('/prueba', upload.single('file'), async (req, res) => {
+  // Processar les dades del formulari i l'arxiu adjunt
+  const textPost = req.body;
+  const uploadedFile = req.file;
+  let objPost = {}
+
+  try {
+    objPost = JSON.parse(textPost.data)
+  } catch (error) {
+    res.status(400).send('Sol·licitud incorrecta.')
+    console.log(error)
+    return
+  }
+
+  if (objPost.type === 'conversa') {
+    console.log("esto es de tipo conversa");
+  } else if (objPost.type === 'imatge') {
+    console.log("esto es de tipo imatge");
+  } else {
+    res.status(400).send('Sol·licitud incorrecta.')
+  }
+})
