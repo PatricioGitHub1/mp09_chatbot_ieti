@@ -149,10 +149,49 @@ class AppData with ChangeNotifier {
 
   // Funcion para enviar al server del chatbot
   void sendBackend(String textBody, {File? selectedFile}) {
-    if (selectedFile == null && textBody.isNotEmpty) {
+    if (selectedFile == null) {
       print("tipus conversa");
-    } else if (selectedFile != null && textBody.isEmpty) {
-      print("tienes que añadir descripcion a la imagen");
+      loadHttpPost("http://localhost:3000/chat", "conversa", selectedFile!);
+    } else {
+      print("tipus image");
+      loadHttpPost("http://localhost:3000/chat", "imatge", selectedFile!);
+    }
+  }
+
+  // Funcion para cargar con o sin imagen
+  Future<String> loadHttpPost(String url, String type, File file) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    switch (type) {
+      case 'imatge':
+        break;
+      case 'conversa':
+        break;
+      default:
+    }
+
+    // Afegir les dades JSON com a part del formulari
+    request.fields['data'] = '{"type":"test"}';
+
+    // Adjunta l'arxiu com a part del formulari
+    var stream = http.ByteStream(file.openRead());
+    var length = await file.length();
+    var multipartFile = http.MultipartFile('file', stream, length,
+        filename: file.path.split('/').last,
+        contentType: MediaType('application', 'octet-stream'));
+    request.files.add(multipartFile);
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      // La sol·licitud ha estat exitosa
+      var responseData = await response.stream.toBytes();
+      var responseString = utf8.decode(responseData);
+      return responseString;
+    } else {
+      // La sol·licitud ha fallat
+      throw Exception(
+          "Error del servidor (appData/loadHttpPostByChunks): ${response.reasonPhrase}");
     }
   }
 }

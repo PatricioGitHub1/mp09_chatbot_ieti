@@ -115,7 +115,7 @@ app.post('/data', upload.single('file'), async (req, res) => {
 
 
 // curl -X POST -F "data={\"type\":\"conversa\"}" -F "file=@package.json" http://localhost:3000/prueba
-app.post('/prueba', upload.single('file'), async (req, res) => {
+app.post('/chat', upload.single('file'), async (req, res) => {
   // Processar les dades del formulari i l'arxiu adjunt
   const textPost = req.body;
   const uploadedFile = req.file;
