@@ -7,6 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
+enum UserType {
+    chatBot,
+    human,
+}
+
 class AppData with ChangeNotifier {
   // Access appData globaly with:
   // AppData appData = Provider.of<AppData>(context);
@@ -195,3 +200,27 @@ class AppData with ChangeNotifier {
     }
   }
 }
+
+
+class MessageBox {
+  UserType owner;
+  String textContent = "";
+  bool hasImage;
+  late File image;
+
+  // Constructor with named parameters
+  MessageBox({
+    required this.owner, // Add the owner parameter
+    required this.textContent,
+    this.hasImage = false,
+    required this.image,
+  });
+
+  // Additional constructor for cases without an image
+  MessageBox.textOnly({
+    required this.owner, // Add the owner parameter
+    required this.textContent,
+  }) : hasImage = false;
+}
+
+
