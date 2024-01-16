@@ -37,8 +37,7 @@ class _LayoutChatState extends State<LayoutChat> {
       mensajes.add(MessageBox.textOnly(
           owner: UserType.chatBot,
           textContent: "Feel free to ask me anything"));
-      mensajes.add(
-          MessageBox.textOnly(owner: UserType.human, textContent: "OK I WILL"));
+
     }
 
     return CupertinoPageScaffold(
@@ -129,13 +128,25 @@ class _LayoutChatState extends State<LayoutChat> {
           : Alignment.centerRight,
       child: Container(
         width: txtBubbleWidth,
-        color: message.owner == UserType.chatBot
+        margin: const EdgeInsets.only(top: 10, bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: message.owner == UserType.chatBot
             ? CupertinoColors.activeBlue
             : CupertinoColors.activeGreen,
+          border: Border.all(
+            width: 1.0
+          ),
+          borderRadius: const BorderRadius.all(
+              Radius.circular(5.0) //                 <--- border radius here
+          ),
+        ),
+
         child: Text(
           message.textContent,
           style: CupertinoTheme.of(context).textTheme.textStyle,
         ),
+        
       ),
     );
   }

@@ -119,6 +119,7 @@ app.post('/chat', upload.single('file'), async (req, res) => {
   // Procesar los datos del formulario JSON
   const objPost = req.body;
   const uploadedFile = req.file;
+  var ResponseText;
 
   if (objPost.type === 'conversa') {
     console.log("Esto es de tipo conversa");
@@ -129,9 +130,10 @@ app.post('/chat', upload.single('file'), async (req, res) => {
       console.log("Nombre del archivo:", uploadedFile.originalname);
       console.log("Contenido del archivo:", uploadedFile.buffer.toString('utf-8'));
     }
+    postMistral(objPost.message, res);
 
     // Aquí puedes realizar acciones necesarias con el mensaje y el archivo, almacenarlo en una base de datos, etc.
-    res.status(200).json({ success: true, message: "Mensaje recibido correctamente" });
+    //res.status(200).json({ success: true, message: 'ds' });
   } else if (objPost.type === 'imatge') {
     console.log("Esto es de tipo imatge");
     // Aquí puedes manejar la solicitud para imágenes si es necesario
@@ -147,3 +149,44 @@ app.post('/chat', upload.single('file'), async (req, res) => {
     res.status(400).json({ success: false, error: 'Solicitud incorrecta.' });
   }
 });
+
+async function postMistral(prompt, res) {
+  const url = "http://localhost:11434/api/generate";
+  const data = {"model":"mistral", "prompt": prompt};
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+    .then(async response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const allResponses = await response.text();
+      const txt = createSingleResponse(allResponses);
+      res.status(200).json({ success: true, message: txt });
+    })
+    
+    .catch(error => {
+      console.error('Error:', error);
+      res.status(400).json({ success: false, error: 'Something went wrong....' });
+    });
+}
+
+function createSingleResponse(allresp) {
+  const lista = allresp.split('\n');
+  var final_text = '';
+  lista.forEach(item => {
+    try {
+      const jsonRes = JSON.parse(item);
+      final_text += jsonRes['response'];
+    } catch (error) {
+      console.log("end of process");
+    }
+  });
+
+  return final_text;
+}
