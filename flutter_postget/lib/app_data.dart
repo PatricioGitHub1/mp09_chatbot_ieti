@@ -57,13 +57,14 @@ class AppData with ChangeNotifier {
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
   //i agafar la informació a mida que es va rebent
-  Future<String> loadHttpPostByChunks(String url, File file) async {
+  Future<void> loadHttpPostByChunks(String url, File file) async {
+    var completer = Completer<void>();
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
-    // Afegir les dades JSON com a part del formulari
+    // Add JSON data as part of the form
     request.fields['data'] = '{"type":"test"}';
 
-    // Adjunta l'arxiu com a part del formulari
+    // Attach the file as part of the form
     var stream = http.ByteStream(file.openRead());
     var length = await file.length();
     var multipartFile = http.MultipartFile('file', stream, length,
@@ -71,18 +72,31 @@ class AppData with ChangeNotifier {
         contentType: MediaType('application', 'octet-stream'));
     request.files.add(multipartFile);
 
-    var response = await request.send();
+    try {
+      var response = await request.send();
 
-    if (response.statusCode == 200) {
-      // La sol·licitud ha estat exitosa
-      var responseData = await response.stream.toBytes();
-      var responseString = utf8.decode(responseData);
-      return responseString;
-    } else {
-      // La sol·licitud ha fallat
-      throw Exception(
-          "Error del servidor (appData/loadHttpPostByChunks): ${response.reasonPhrase}");
+      dataPost = "";
+
+      // Listen to each chunk of data
+      response.stream.transform(utf8.decoder).listen(
+        (data) {
+          // Update dataPost with the latest data
+          dataPost += data;
+          notifyListeners();
+        },
+        onDone: () {
+          completer.complete();
+        },
+        onError: (error) {
+          completer.completeError(
+              "Error del servidor (appData/loadHttpPostByChunks): $error");
+        },
+      );
+    } catch (e) {
+      completer.completeError("Excepció (appData/loadHttpPostByChunks): $e");
     }
+
+    return completer.future;
   }
 
   // Funció per fer carregar dades d'un arxiu json de la carpeta 'assets'
@@ -120,10 +134,7 @@ class AppData with ChangeNotifier {
       case 'POST':
         loadingPost = true;
         notifyListeners();
-
-        dataPost = await loadHttpPostByChunks(
-            'http://localhost:3000/data', selectedFile!);
-
+        await loadHttpPostByChunks('http://localhost:3000/data', selectedFile!);
         loadingPost = false;
         notifyListeners();
         break;

@@ -69,7 +69,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
     }
 
     String stringPost = "";
-    if (appData.loadingPost) {
+    if (appData.loadingPost && appData.dataPost == "") {
       stringPost = "Loading ...";
     } else if (appData.dataPost != null) {
       stringPost = "GET: ${appData.dataPost.toString()}";
