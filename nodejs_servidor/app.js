@@ -116,24 +116,34 @@ app.post('/data', upload.single('file'), async (req, res) => {
 
 // curl -X POST -F "data={\"type\":\"conversa\"}" -F "file=@package.json" http://localhost:3000/prueba
 app.post('/chat', upload.single('file'), async (req, res) => {
-  // Processar les dades del formulari i l'arxiu adjunt
-  const textPost = req.body;
+  // Procesar los datos del formulario JSON
+  const objPost = req.body;
   const uploadedFile = req.file;
-  let objPost = {}
-
-  try {
-    objPost = JSON.parse(textPost.data)
-  } catch (error) {
-    res.status(400).send('Sol·licitud incorrecta.')
-    console.log(error)
-    return
-  }
 
   if (objPost.type === 'conversa') {
-    console.log("esto es de tipo conversa");
+    console.log("Esto es de tipo conversa");
+    console.log("Mensaje recibido:", objPost.message); // Mensaje enviado desde Flutter
+
+    if (uploadedFile) {
+      console.log("Archivo adjunto recibido:");
+      console.log("Nombre del archivo:", uploadedFile.originalname);
+      console.log("Contenido del archivo:", uploadedFile.buffer.toString('utf-8'));
+    }
+
+    // Aquí puedes realizar acciones necesarias con el mensaje y el archivo, almacenarlo en una base de datos, etc.
+    res.status(200).json({ success: true, message: "Mensaje recibido correctamente" });
   } else if (objPost.type === 'imatge') {
-    console.log("esto es de tipo imatge");
+    console.log("Esto es de tipo imatge");
+    // Aquí puedes manejar la solicitud para imágenes si es necesario
+
+    if (uploadedFile) {
+      console.log("Archivo adjunto recibido:");
+      console.log("Nombre del archivo:", uploadedFile.originalname);
+      console.log("Contenido del archivo:", uploadedFile.buffer.toString('utf-8'));
+    }
+
+    res.status(200).json({ success: true, message: "Solicitud de imagen recibida correctamente" });
   } else {
-    res.status(400).send('Sol·licitud incorrecta.')
+    res.status(400).json({ success: false, error: 'Solicitud incorrecta.' });
   }
-})
+});
