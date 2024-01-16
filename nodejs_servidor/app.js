@@ -62,8 +62,11 @@ async function getLlistat(req, res) {
   if (query.cerca && query.color) {
     // Així es retorna un text per parts (chunks)
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' });
+    await new Promise(resolve => setTimeout(resolve, 1000))
     res.write(`result: "Aquí tens el llistat de ${query.cerca} de color ${query.color}"`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
     res.write(`\n list: ["item0", "item1", "item2"]`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
     res.end(`\n end: "Això és tot"`)
   } else {
     // Així es retorna un objecte JSON directament

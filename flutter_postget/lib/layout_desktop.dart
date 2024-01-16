@@ -62,7 +62,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
     AppData appData = Provider.of<AppData>(context);
 
     String stringGet = "";
-    if (appData.loadingGet) {
+    if (appData.loadingGet && appData.dataGet == "") {
       stringGet = "Loading ...";
     } else if (appData.dataGet != null) {
       stringGet = "GET: ${appData.dataGet.toString()}";
