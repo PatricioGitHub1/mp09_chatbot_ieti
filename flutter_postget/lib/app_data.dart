@@ -25,11 +25,6 @@ class AppData with ChangeNotifier {
     var httpClient = HttpClient();
     var completer = Completer<void>();
 
-    // If development, wait 1 second to simulate a delay
-    if (!kReleaseMode) {
-      await Future.delayed(const Duration(seconds: 1));
-    }
-
     try {
       var request = await httpClient.getUrl(Uri.parse(url));
       var response = await request.close();
@@ -59,7 +54,7 @@ class AppData with ChangeNotifier {
   }
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
-  //i agafar la informació a mida que es va rebent
+  // i agafar la informació a mida que es va rebent
   Future<void> loadHttpPostByChunks(String url, File file) async {
     var completer = Completer<void>();
     var request = http.MultipartRequest('POST', Uri.parse(url));
