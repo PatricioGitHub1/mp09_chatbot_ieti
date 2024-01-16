@@ -94,7 +94,7 @@ app.post('/data', upload.single('file'), async (req, res) => {
 
   // A l'exercici 'XatIETI' hi hauràn dos tipus de petició:
   // - 'conversa' que retornara una petició generada per 'mistral'
-  // - 'imatge' que retornara una imatge generada per 'llava'
+  // - 'imatge' que retornara la interpretació d'una imatge enviada a 'llava'
 
   if (objPost.type === 'test') {
     if (uploadedFile) {
