@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'app_data.dart';
 
 class LayoutChat extends StatefulWidget {
@@ -21,8 +25,31 @@ class _LayoutChatState extends State<LayoutChat> {
 
   List<MessageBox> mensajes = [];
 
+  Future<File> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      return file;
+    } else {
+      throw Exception("No s'ha seleccionat cap arxiu.");
+    }
+  }
+
+  // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
+  Future<void> uploadFile(AppData appData) async {
+    try {
+      appData.load("POST", selectedFile: await pickFile());
+    } catch (e) {
+      if (kDebugMode) {
+        print("Excepció (uploadFile): $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     windowHeight = MediaQuery.of(context).size.height;
     windowWidth = MediaQuery.of(context).size.width * 0.8;
 
@@ -83,6 +110,13 @@ class _LayoutChatState extends State<LayoutChat> {
                       messageController.clear();
                     },
                     child: const Text('Send'),
+                  ),
+                  CupertinoButton(
+                    onPressed: () async {
+                      uploadFile(appData);
+                      // Aquí puedes realizar acciones adicionales con el archivo seleccionado
+                    },
+                    child: const Text('Upload Image'),
                   ),
                 ],
               ),
