@@ -18,6 +18,7 @@ class LayoutChat extends StatefulWidget {
 }
 
 class _LayoutChatState extends State<LayoutChat> {
+  File selectedImage = File('');
   double windowHeight = 0;
   double windowWidth = 0;
 
@@ -37,6 +38,7 @@ class _LayoutChatState extends State<LayoutChat> {
   }
 
   // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
+  // Hacer que al seleccionar la imagen, se muestre algo que diga: imagen seleccionada y que cuando se envíe el mensaje, se envíe la imagen
   Future<void> uploadFile(AppData appData) async {
     try {
       appData.load("POST", selectedFile: await pickFile());
@@ -64,7 +66,6 @@ class _LayoutChatState extends State<LayoutChat> {
       mensajes.add(MessageBox.textOnly(
           owner: UserType.chatBot,
           textContent: "Feel free to ask me anything"));
-
     }
 
     return CupertinoPageScaffold(
@@ -107,15 +108,15 @@ class _LayoutChatState extends State<LayoutChat> {
                       addMessage(UserType.human, messageController.text);
                       sendMessage(messageController.text);
                       messageController.clear();
+                      selectedImage = File('');
                     },
                     child: const Text('Send'),
                   ),
                   CupertinoButton(
                     onPressed: () async {
-                      uploadFile(appData);
-                      // Aquí puedes realizar acciones adicionales con el archivo seleccionado
+                      selectedImage = await pickFile();
                     },
-                    child: const Text('Upload Image'),
+                    child: const Text('Select Image'),
                   ),
                 ],
               ),
@@ -166,21 +167,17 @@ class _LayoutChatState extends State<LayoutChat> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: message.owner == UserType.chatBot
-            ? CupertinoColors.activeBlue
-            : CupertinoColors.activeGreen,
-          border: Border.all(
-            width: 1.0
-          ),
+              ? CupertinoColors.activeBlue
+              : CupertinoColors.activeGreen,
+          border: Border.all(width: 1.0),
           borderRadius: const BorderRadius.all(
               Radius.circular(5.0) //                 <--- border radius here
-          ),
+              ),
         ),
-
         child: Text(
           message.textContent,
           style: CupertinoTheme.of(context).textTheme.textStyle,
         ),
-        
       ),
     );
   }
