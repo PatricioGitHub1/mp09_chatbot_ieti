@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 enum UserType {
-    chatBot,
-    human,
+  chatBot,
+  human,
 }
 
 class AppData with ChangeNotifier {
@@ -159,7 +159,7 @@ class AppData with ChangeNotifier {
       loadHttpPost("http://localhost:3000/chat", "conversa", selectedFile!);
     } else {
       print("tipus image");
-      loadHttpPost("http://localhost:3000/chat", "imatge", selectedFile!);
+      loadHttpPost("http://localhost:3000/chat", "imatge", selectedFile);
     }
   }
 
@@ -201,7 +201,6 @@ class AppData with ChangeNotifier {
   }
 }
 
-
 class MessageBox {
   UserType owner;
   String textContent = "";
@@ -222,5 +221,3 @@ class MessageBox {
     required this.textContent,
   }) : hasImage = false;
 }
-
-

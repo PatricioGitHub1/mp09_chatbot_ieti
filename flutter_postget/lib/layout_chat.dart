@@ -19,6 +19,7 @@ class LayoutChat extends StatefulWidget {
 
 class _LayoutChatState extends State<LayoutChat> {
   File selectedImage = File('');
+  bool isFileSelected = false;
   double windowHeight = 0;
   double windowWidth = 0;
 
@@ -89,11 +90,42 @@ class _LayoutChatState extends State<LayoutChat> {
                 ),
               ),
             ),
+            AnimatedContainer(
+              padding: const EdgeInsets.all(10),
+              duration: const Duration(milliseconds: 100),
+              height: isFileSelected ? 40 : 0,
+              color: CupertinoColors.activeGreen,
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'File Selected',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      removeFile();
+                    },
+                    child: const Icon(CupertinoIcons.xmark_circle),
+                  ),
+                ],
+              ),
+            ),
             Container(
               padding: const EdgeInsets.all(8.0),
               color: CupertinoColors.lightBackgroundGray,
               child: Row(
                 children: [
+                  CupertinoButton(
+                    onPressed: () async {
+                      selectedImage = await pickFile();
+                      isFileSelected = true;
+                      setState(() {});
+                    },
+                    child:
+                        const Icon(CupertinoIcons.photo_fill_on_rectangle_fill),
+                  ),
                   Expanded(
                     child: CupertinoTextField(
                       controller: messageController,
@@ -102,21 +134,20 @@ class _LayoutChatState extends State<LayoutChat> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      if (messageController.text.isEmpty) {
-                        return;
+                      if (messageController.text.isEmpty &&
+                          selectedImage.path.isEmpty) {
+                      } else if (selectedImage.path.isEmpty) {
+                        addMessage(
+                            UserType.human, messageController.text, null);
+                      } else {
+                        addMessage(UserType.human, messageController.text,
+                            selectedImage);
                       }
-                      addMessage(UserType.human, messageController.text);
                       sendMessage(messageController.text);
                       messageController.clear();
-                      selectedImage = File('');
+                      removeFile();
                     },
                     child: const Text('Send'),
-                  ),
-                  CupertinoButton(
-                    onPressed: () async {
-                      selectedImage = await pickFile();
-                    },
-                    child: const Text('Select Image'),
                   ),
                 ],
               ),
@@ -127,8 +158,16 @@ class _LayoutChatState extends State<LayoutChat> {
     );
   }
 
-  void addMessage(UserType owner, String textContent) {
+  void addMessage(UserType owner, String textContent, File? imageContent) {
     setState(() {
+      if (imageContent != null) {
+        mensajes.add(MessageBox(
+            owner: owner,
+            textContent: textContent,
+            image: imageContent,
+            hasImage: true));
+        return;
+      }
       mensajes.add(MessageBox.textOnly(owner: owner, textContent: textContent));
     });
   }
@@ -146,7 +185,7 @@ class _LayoutChatState extends State<LayoutChat> {
       print('Mensaje enviado con éxito');
       final jsonResponse = jsonDecode(response.body);
       final botMessage = jsonResponse['message'];
-      addMessage(UserType.chatBot, botMessage);
+      addMessage(UserType.chatBot, botMessage, null);
     } else {
       print('Error al enviar el mensaje: ${response.statusCode}');
     }
@@ -174,11 +213,37 @@ class _LayoutChatState extends State<LayoutChat> {
               Radius.circular(5.0) //                 <--- border radius here
               ),
         ),
-        child: Text(
-          message.textContent,
-          style: CupertinoTheme.of(context).textTheme.textStyle,
-        ),
+        child: message.hasImage
+            ? Column(
+                children: [
+                  Container(
+                    height: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: FileImage(message.image),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message.textContent,
+                    style: CupertinoTheme.of(context).textTheme.textStyle,
+                  ),
+                ],
+              )
+            : Text(
+                message.textContent,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+              ),
       ),
     );
+  }
+
+  removeFile() {
+    selectedImage = File('');
+    isFileSelected = false;
+    setState(() {});
   }
 }
