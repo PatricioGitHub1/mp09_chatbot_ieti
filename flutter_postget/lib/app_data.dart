@@ -62,31 +62,44 @@ class AppData with ChangeNotifier {
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
   //i agafar la informació a mida que es va rebent
-  Future<String> loadHttpPostByChunks(String url, File file) async {
+  Future<String> loadHttpPostByChunks(String url, File file,
+      {String? message}) async {
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
-    // Afegir les dades JSON com a part del formulari
-    request.fields['data'] = '{"type":"test"}';
-
-    // Adjunta l'arxiu com a part del formulari
-    var stream = http.ByteStream(file.openRead());
-    var length = await file.length();
-    var multipartFile = http.MultipartFile('file', stream, length,
-        filename: file.path.split('/').last,
-        contentType: MediaType('application', 'octet-stream'));
-    request.files.add(multipartFile);
-
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      // La sol·licitud ha estat exitosa
-      var responseData = await response.stream.toBytes();
-      var responseString = utf8.decode(responseData);
-      return responseString;
+    // Verifica si se ha adjuntado un archivo
+    if (file.path.isEmpty) {
+      request.fields['type'] = 'conversa';
+      request.fields['message'] = '$message';
     } else {
-      // La sol·licitud ha fallat
-      throw Exception(
-          "Error del servidor (appData/loadHttpPostByChunks): ${response.reasonPhrase}");
+      request.fields['type'] = 'imatge';
+      request.fields['message'] = '$message';
+
+      var stream = http.ByteStream(file.openRead());
+      var length = await file.length();
+      var multipartFile = http.MultipartFile(
+        'file',
+        stream,
+        length,
+        filename: file.path.split('/').last,
+        contentType: MediaType('application', 'octet-stream'),
+      );
+      request.files.add(multipartFile);
+    }
+
+    try {
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        // Procesar la respuesta del servidor
+        var responseData = await response.stream.toBytes();
+        var responseString = utf8.decode(responseData);
+        return responseString;
+      } else {
+        throw Exception(
+            "Error del servidor (appData/loadHttpPostByChunks): ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      print("Excepción en loadHttpPostByChunks: $e");
+      throw e;
     }
   }
 
@@ -153,13 +166,15 @@ class AppData with ChangeNotifier {
   }
 
   // Funcion para enviar al server del chatbot
-  void sendBackend(String textBody, {File? selectedFile}) {
-    if (selectedFile == null) {
+  void sendBackend(String textBody, File selectedFile) {
+    if (selectedFile.path.isEmpty) {
       print("tipus conversa");
-      loadHttpPost("http://localhost:3000/chat", "conversa", selectedFile!);
+      loadHttpPostByChunks("http://localhost:3000/chat", selectedFile,
+          message: textBody);
     } else {
       print("tipus image");
-      loadHttpPost("http://localhost:3000/chat", "imatge", selectedFile);
+      loadHttpPostByChunks("http://localhost:3000/chat", selectedFile,
+          message: textBody);
     }
   }
 

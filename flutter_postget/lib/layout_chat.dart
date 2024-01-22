@@ -18,6 +18,8 @@ class LayoutChat extends StatefulWidget {
 }
 
 class _LayoutChatState extends State<LayoutChat> {
+  final ScrollController _scrollController = ScrollController();
+
   File selectedImage = File('');
   bool isFileSelected = false;
   double windowHeight = 0;
@@ -81,7 +83,9 @@ class _LayoutChatState extends State<LayoutChat> {
                 width: windowWidth,
                 color: CupertinoColors.white,
                 child: CupertinoScrollbar(
+                  controller: _scrollController,
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: mensajes.length,
                     itemBuilder: (context, index) {
                       return buildMessageItem(mensajes[index]);
@@ -136,6 +140,7 @@ class _LayoutChatState extends State<LayoutChat> {
                     onPressed: () {
                       if (messageController.text.isEmpty &&
                           selectedImage.path.isEmpty) {
+                        return;
                       } else if (selectedImage.path.isEmpty) {
                         addMessage(
                             UserType.human, messageController.text, null);
@@ -143,7 +148,8 @@ class _LayoutChatState extends State<LayoutChat> {
                         addMessage(UserType.human, messageController.text,
                             selectedImage);
                       }
-                      sendMessage(messageController.text);
+                      appData.sendBackend(
+                          messageController.text, selectedImage);
                       messageController.clear();
                       removeFile();
                     },
@@ -166,12 +172,25 @@ class _LayoutChatState extends State<LayoutChat> {
             textContent: textContent,
             image: imageContent,
             hasImage: true));
+        scrollToEnd();
         return;
       }
+
       mensajes.add(MessageBox.textOnly(owner: owner, textContent: textContent));
+      scrollToEnd();
     });
   }
 
+  void scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    });
+  }
+/*
   Future<void> sendMessage(String message) async {
     final url = Uri.parse(
         'http://localhost:3000/chat'); // Reemplaza con la dirección de tu servidor
@@ -190,6 +209,7 @@ class _LayoutChatState extends State<LayoutChat> {
       print('Error al enviar el mensaje: ${response.statusCode}');
     }
   }
+*/
 
   Widget buildMessageItem(MessageBox message) {
     double txtBubbleWidth = windowWidth * 0.45;
@@ -245,5 +265,11 @@ class _LayoutChatState extends State<LayoutChat> {
     selectedImage = File('');
     isFileSelected = false;
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
