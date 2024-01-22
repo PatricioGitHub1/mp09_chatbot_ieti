@@ -45,29 +45,19 @@ app.post('/chat', upload.single('file'), async (req, res) => {
   const objPost = req.body;
   const uploadedFile = req.file;
   var ResponseText;
-
+  console.log("Mensaje recibido:", objPost.type); // Mensaje enviado desde Flutter
   if (objPost.type === 'conversa') {
     console.log("Esto es de tipo conversa");
     console.log("Mensaje recibido:", objPost.message); // Mensaje enviado desde Flutter
 
-    if (uploadedFile) {
-      console.log("Archivo adjunto recibido:");
-      console.log("Nombre del archivo:", uploadedFile.originalname);
-      console.log("Contenido del archivo:", uploadedFile.buffer.toString('utf-8'));
-    }
-    postMistral(objPost.message, res);
-
+    //postMistral(objPost.message, res);
     // Aquí puedes realizar acciones necesarias con el mensaje y el archivo, almacenarlo en una base de datos, etc.
     //res.status(200).json({ success: true, message: 'ds' });
   } else if (objPost.type === 'imatge') {
     console.log("Esto es de tipo imatge");
+    console.log("Mensaje recibido:", objPost.message); // Mensaje enviado desde Flutter
+    console.log("Imagen recibida:", uploadedFile.originalname); // Nombre del archivo enviado desde Flutter
     // Aquí puedes manejar la solicitud para imágenes si es necesario
-
-    if (uploadedFile) {
-      console.log("Archivo adjunto recibido:");
-      console.log("Nombre del archivo:", uploadedFile.originalname);
-      console.log("Contenido del archivo:", uploadedFile.buffer.toString('utf-8'));
-    }
 
     res.status(200).json({ success: true, message: "Solicitud de imagen recibida correctamente" });
   } else {
