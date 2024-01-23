@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'app_data.dart';
 
@@ -37,18 +34,6 @@ class _LayoutChatState extends State<LayoutChat> {
       return file;
     } else {
       throw Exception("No s'ha seleccionat cap arxiu.");
-    }
-  }
-
-  // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
-  // Hacer que al seleccionar la imagen, se muestre algo que diga: imagen seleccionada y que cuando se envíe el mensaje, se envíe la imagen
-  Future<void> uploadFile(AppData appData) async {
-    try {
-      appData.load("POST", selectedFile: await pickFile());
-    } catch (e) {
-      if (kDebugMode) {
-        print("Excepció (uploadFile): $e");
-      }
     }
   }
 

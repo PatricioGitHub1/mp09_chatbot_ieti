@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_desktop_kit/cdk.dart';
 import 'package:flutter_postget/layout_chat.dart';
-import 'package:flutter_postget/layout_desktop.dart';
 
 // Main application widget
 class App extends StatefulWidget {

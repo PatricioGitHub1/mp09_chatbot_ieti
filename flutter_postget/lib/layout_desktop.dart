@@ -46,17 +46,6 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
     }
   }
 
-  // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
-  Future<void> uploadFile(AppData appData) async {
-    try {
-      appData.load("POST", selectedFile: await pickFile());
-    } catch (e) {
-      if (kDebugMode) {
-        print("Excepció (uploadFile): $e");
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
@@ -96,9 +85,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              buildCustomButton('Crida tipus GET', () {
-                appData.load("GET");
-              }),
+              buildCustomButton('Crida tipus GET', () {}),
               Container(
                 width: 10,
               ),
@@ -114,9 +101,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              buildCustomButton('Crida tipus POST', () {
-                uploadFile(appData);
-              }),
+              buildCustomButton('Crida tipus POST', () {}),
               Container(
                 width: 10,
               ),
@@ -132,9 +117,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              buildCustomButton('Llegir arxiu .JSON', () {
-                appData.load("FILE");
-              }),
+              buildCustomButton('Llegir arxiu .JSON', () {}),
               Container(
                 width: 10,
               ),
