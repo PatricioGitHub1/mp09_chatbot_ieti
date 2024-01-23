@@ -64,7 +64,8 @@ class AppData with ChangeNotifier {
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
   // i agafar la informació a mida que es va rebent
-  Future<void> loadHttpPostByChunks(String url, String body, MessageBox botMessage,File? file) async {
+  Future<void> loadHttpPostByChunks(
+      String url, String body, MessageBox botMessage, File? file) async {
     var completer = Completer<void>();
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
@@ -82,7 +83,7 @@ class AppData with ChangeNotifier {
     } else {
       request.fields['data'] = '{"type":"conversa", "message":"$body"}';
     }
-    
+
     try {
       var response = await request.send();
 
@@ -122,7 +123,8 @@ class AppData with ChangeNotifier {
   void load(String body, MessageBox botMessage, {File? selectedFile}) async {
     loadingPost = true;
     notifyListeners();
-    await loadHttpPostByChunks('http://localhost:3000/data', body, botMessage,selectedFile);
+    await loadHttpPostByChunks(
+        'http://localhost:3000/data', body, botMessage, selectedFile);
     loadingPost = false;
     notifyListeners();
   }
