@@ -161,6 +161,7 @@ app.post('/data', upload.single('file'), async (req, res) => {
     let fileContent = uploadedFile.buffer.toString('base64');
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
     const url = "http://localhost:11434/api/generate";
+    // model
     const data = {"model":"llava", "prompt": objPost.message, "images":[fileContent]};
 
     fetch(url, {
