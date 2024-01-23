@@ -158,6 +158,43 @@ app.post('/data', upload.single('file'), async (req, res) => {
       });
   } else if (objPost.type === 'imatge') {
     console.log("en imatge...");
+    let fileContent = uploadedFile.buffer.toString('base64');
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
+    const url = "http://localhost:11434/api/generate";
+    const data = {"model":"llava", "prompt": objPost.message, "images":[fileContent]};
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const reader = response.body.getReader();
+        keepStreamAlive = true;
+        while (keepStreamAlive) {
+          const { done, value } = await reader.read();
+    
+          if (done) {
+            break;
+          }
+          const jsonData = JSON.parse(new TextDecoder().decode(value));
+          console.log(jsonData.response);
+          res.write(jsonData.response);
+        }
+
+        res.end("")
+      })
+      
+      .catch(error => {
+        console.error('Error:', error);
+        res.status(400).json({ success: false, error: 'Something went wrong....' });
+      });
+    
   } else {
     res.status(400).send('Sol·licitud incorrecta.')
   }

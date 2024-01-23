@@ -28,8 +28,7 @@ class _LayoutChatState extends State<LayoutChat> {
   // Funció per seleccionar un arxiu
   Future<File> pickFile() async {
     FilePickerResult? result;
-    
-    print('ha entrado');
+
     result = await FilePicker.platform.pickFiles(dialogTitle: 'prueba', withData: true);
 
     if (result != null) {
@@ -41,10 +40,11 @@ class _LayoutChatState extends State<LayoutChat> {
   }
 
   // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
-  Future<void> uploadFile(AppData appData, MessageBox msg) async {
+  Future<void> uploadFile(AppData appData) async {
     try {
-      //appData.load("POST", msg);
-      await pickFile();
+
+      appData.selectedImage = await pickFile();
+      print('selected file');
     } catch (e) {
       if (kDebugMode) {
         print("Excepció (uploadFile): $e");
@@ -101,9 +101,10 @@ class _LayoutChatState extends State<LayoutChat> {
               child: Row(
                 children: [
                   CupertinoButton(
-                    onPressed: () {
+                    onPressed: () async {
                       //print('en botton para enviar img');
-                      uploadFile(appData, MessageBox.textOnly(owner: UserType.human, textContent: "test"));
+                      await uploadFile(appData);
+                      
                     },
                     child:
                         const Icon(CupertinoIcons.photo_fill_on_rectangle_fill),
@@ -121,12 +122,8 @@ class _LayoutChatState extends State<LayoutChat> {
                       }
                       MessageBox newBotMessage = MessageBox.textOnly(owner: UserType.chatBot, textContent: "Loading...");
                       // esto es para determinar si es tipo conversa o imatge, falta el file picker ...
-                      if (true) {
-                        addMessage(UserType.human, messageController.text);
-                        appData.load(messageController.text, newBotMessage);
-                      } else {
-                        appData.load(messageController.text, newBotMessage);
-                      }
+                      addMessage(UserType.human, messageController.text);
+                      appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
                       
                       mensajes.add(newBotMessage);
 
