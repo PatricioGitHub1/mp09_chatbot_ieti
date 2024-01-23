@@ -134,7 +134,7 @@ class _LayoutChatState extends State<LayoutChat> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      print('stopping stream of message');
+                      print('stopping stream of message ...');
                       appData.loadingPost = false;
                     },
                     child: const Icon(CupertinoIcons.clear_fill),
