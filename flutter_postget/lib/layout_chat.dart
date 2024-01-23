@@ -29,7 +29,8 @@ class _LayoutChatState extends State<LayoutChat> {
   Future<File> pickFile() async {
     FilePickerResult? result;
 
-    result = await FilePicker.platform.pickFiles(dialogTitle: 'prueba', withData: true);
+    result = await FilePicker.platform
+        .pickFiles(dialogTitle: 'prueba', withData: true);
 
     if (result != null) {
       File file = File(result.files.single.path!);
@@ -42,7 +43,6 @@ class _LayoutChatState extends State<LayoutChat> {
   // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
   Future<void> uploadFile(AppData appData) async {
     try {
-
       appData.selectedImage = await pickFile();
       print('selected file');
     } catch (e) {
@@ -51,7 +51,7 @@ class _LayoutChatState extends State<LayoutChat> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
@@ -104,7 +104,6 @@ class _LayoutChatState extends State<LayoutChat> {
                     onPressed: () async {
                       //print('en botton para enviar img');
                       await uploadFile(appData);
-                      
                     },
                     child:
                         const Icon(CupertinoIcons.photo_fill_on_rectangle_fill),
@@ -120,11 +119,13 @@ class _LayoutChatState extends State<LayoutChat> {
                       if (messageController.text.isEmpty) {
                         return;
                       }
-                      MessageBox newBotMessage = MessageBox.textOnly(owner: UserType.chatBot, textContent: "Loading...");
+                      MessageBox newBotMessage = MessageBox.textOnly(
+                          owner: UserType.chatBot, textContent: "Loading...");
                       // esto es para determinar si es tipo conversa o imatge, falta el file picker ...
                       addMessage(UserType.human, messageController.text);
-                      appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
-                      
+                      appData.load(messageController.text, newBotMessage,
+                          selectedFile: appData.selectedImage);
+
                       mensajes.add(newBotMessage);
 
                       messageController.clear();
@@ -136,8 +137,7 @@ class _LayoutChatState extends State<LayoutChat> {
                       print('stopping stream of message');
                       appData.loadingPost = false;
                     },
-                    child:
-                        const Icon(CupertinoIcons.clear_fill),
+                    child: const Icon(CupertinoIcons.clear_fill),
                   ),
                 ],
               ),
