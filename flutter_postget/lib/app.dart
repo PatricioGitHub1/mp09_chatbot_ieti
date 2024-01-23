@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_desktop_kit/cdk.dart';
+import 'package:flutter_postget/layout_chat.dart';
 import 'layout_desktop.dart';
 
 // Main application widget
@@ -17,7 +18,8 @@ class AppState extends State<App> {
     return const CDKApp(
         defaultAppearance: "system", // system, light, dark
         defaultColor: "systemBlue",
-        child: LayoutDesktop(title: "App Desktop Title"));
+        //child: LayoutDesktop(title: "App Desktop Title"));
+        child:  LayoutChat(title: "ChatBot IETI | EARLY RELEASE"));
   }
 
   // Definir el contingut del widget 'App'

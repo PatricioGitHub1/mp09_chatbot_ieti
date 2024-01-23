@@ -49,7 +49,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
   // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
   Future<void> uploadFile(AppData appData) async {
     try {
-      appData.load("POST", selectedFile: await pickFile());
+      //appData.load("POST", selectedFile: await pickFile());
     } catch (e) {
       if (kDebugMode) {
         print("Excepció (uploadFile): $e");
@@ -97,7 +97,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               buildCustomButton('Crida tipus GET', () {
-                appData.load("GET");
+                //appData.load("GET");
               }),
               Container(
                 width: 10,
@@ -133,7 +133,7 @@ class _LayoutDesktopState extends State<LayoutDesktop> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               buildCustomButton('Llegir arxiu .JSON', () {
-                appData.load("FILE");
+                //appData.load("FILE");
               }),
               Container(
                 width: 10,

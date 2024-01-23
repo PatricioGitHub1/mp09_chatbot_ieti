@@ -2,6 +2,8 @@ const express = require('express')
 const multer = require('multer');
 const url = require('url')
 
+var keepStreamAlive;
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -73,12 +75,18 @@ async function getLlistat(req, res) {
     res.status(400).json({ result: "Paràmetres incorrectes" })
   }
 }
+// Cerrar stream
+app.post('/close', async (req, res) => {
+  console.log('closing stream to client...')
+  keepStreamAlive = false;
+})
 
 // Configurar direcció tipus 'POST' amb la URL ‘/data'
 // Enlloc de fer una crida des d'un navegador, fer servir 'curl'
 // curl -X POST -F "data={\"type\":\"test\"}" -F "file=@package.json" http://localhost:3000/data
 app.post('/data', upload.single('file'), async (req, res) => {
   // Processar les dades del formulari i l'arxiu adjunt
+  keepStreamAlive = true;
   const textPost = req.body;
   const uploadedFile = req.file;
   let objPost = {}
@@ -111,7 +119,48 @@ app.post('/data', upload.single('file'), async (req, res) => {
     res.write("POST Second line\n")
     await new Promise(resolve => setTimeout(resolve, 1000))
     res.end("POST Last line\n")
+  } if (objPost.type === 'conversa') {
+    console.log("en conversa...");
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
+    const url = "http://localhost:11434/api/generate";
+    const data = {"model":"mistral", "prompt": objPost.message};
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const reader = response.body.getReader();
+        keepStreamAlive = true;
+        while (keepStreamAlive) {
+          const { done, value } = await reader.read();
+    
+          if (done) {
+            break;
+          }
+          const jsonData = JSON.parse(new TextDecoder().decode(value));
+          console.log(jsonData.response);
+          res.write(jsonData.response);
+        }
+
+        res.end("")
+      })
+      
+      .catch(error => {
+        console.error('Error:', error);
+        res.status(400).json({ success: false, error: 'Something went wrong....' });
+      });
+  } else if (objPost.type === 'imatge') {
+    console.log("en imatge...");
   } else {
     res.status(400).send('Sol·licitud incorrecta.')
   }
+
+  keepStreamAlive = false;
 })

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_postget/message_box.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -19,6 +20,14 @@ class AppData with ChangeNotifier {
   dynamic dataGet;
   dynamic dataPost;
   dynamic dataFile;
+
+  final ScrollController scrollController = ScrollController();
+
+  late File? selectedImage;
+
+  void scrollDown() {
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+  }
 
   // Funció per fer crides tipus 'GET' i agafar la informació a mida que es va rebent
   Future<void> loadHttpGetByChunks(String url) async {
@@ -55,21 +64,25 @@ class AppData with ChangeNotifier {
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
   // i agafar la informació a mida que es va rebent
-  Future<void> loadHttpPostByChunks(String url, File file) async {
+  Future<void> loadHttpPostByChunks(String url, String body, MessageBox botMessage,File? file) async {
     var completer = Completer<void>();
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
     // Add JSON data as part of the form
-    request.fields['data'] = '{"type":"test"}';
-
+    //request.fields['data'] = '{"type":"test"}';
     // Attach the file as part of the form
-    var stream = http.ByteStream(file.openRead());
-    var length = await file.length();
-    var multipartFile = http.MultipartFile('file', stream, length,
-        filename: file.path.split('/').last,
-        contentType: MediaType('application', 'octet-stream'));
-    request.files.add(multipartFile);
-
+    if (file != null) {
+      request.fields['data'] = '{"type":"imatge", "message":"$body"}';
+      var stream = http.ByteStream(file.openRead());
+      var length = await file.length();
+      var multipartFile = http.MultipartFile('file', stream, length,
+          filename: file.path.split('/').last,
+          contentType: MediaType('application', 'octet-stream'));
+      request.files.add(multipartFile);
+    } else {
+      request.fields['data'] = '{"type":"conversa", "message":"$body"}';
+    }
+    
     try {
       var response = await request.send();
 
@@ -78,9 +91,17 @@ class AppData with ChangeNotifier {
       // Listen to each chunk of data
       response.stream.transform(utf8.decoder).listen(
         (data) {
-          // Update dataPost with the latest data
-          dataPost += data;
-          notifyListeners();
+          if (!loadingPost) {
+            http.post(Uri.parse("http://localhost:3000/close"));
+            return;
+          } else {
+            // Update dataPost with the latest data
+            dataPost += data;
+            botMessage.textContent = dataPost;
+            print(data);
+            notifyListeners();
+            scrollDown();
+          }
         },
         onDone: () {
           completer.complete();
@@ -97,50 +118,12 @@ class AppData with ChangeNotifier {
     return completer.future;
   }
 
-  // Funció per fer carregar dades d'un arxiu json de la carpeta 'assets'
-  Future<dynamic> readJsonAsset(String filePath) async {
-    // If development, wait 1 second to simulate a delay
-    if (!kReleaseMode) {
-      await Future.delayed(const Duration(seconds: 1));
-    }
-
-    try {
-      var jsonString = await rootBundle.loadString(filePath);
-      final jsonData = json.decode(jsonString);
-      return jsonData;
-    } catch (e) {
-      throw Exception("Excepció (appData/readJsonAsset): $e");
-    }
-  }
-
   // Carregar dades segons el tipus que es demana
-  void load(String type, {File? selectedFile}) async {
-    switch (type) {
-      case 'GET':
-        loadingGet = true;
-        notifyListeners();
-        await loadHttpGetByChunks(
-            'http://localhost:3000/llistat?cerca=motos&color=vermell');
-        loadingGet = false;
-        notifyListeners();
-        break;
-      case 'POST':
-        loadingPost = true;
-        notifyListeners();
-        await loadHttpPostByChunks('http://localhost:3000/data', selectedFile!);
-        loadingPost = false;
-        notifyListeners();
-        break;
-      case 'FILE':
-        loadingFile = true;
-        notifyListeners();
-
-        var fileData = await readJsonAsset("assets/data/example.json");
-
-        loadingFile = false;
-        dataFile = fileData;
-        notifyListeners();
-        break;
-    }
+  void load(String body, MessageBox botMessage, {File? selectedFile}) async {
+    loadingPost = true;
+    notifyListeners();
+    await loadHttpPostByChunks('http://localhost:3000/data', body, botMessage,selectedFile);
+    loadingPost = false;
+    notifyListeners();
   }
 }
