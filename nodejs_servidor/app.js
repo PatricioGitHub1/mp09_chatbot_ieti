@@ -51,6 +51,7 @@ app.post('/chat', upload.single('file'), async (req, res) => {
     console.log("Mensaje recibido:", objPost.message); // Mensaje enviado desde Flutter
 
     //postMistral(objPost.message, res);
+    res.status(200).json({ success: true, message: "Solicitud de conversa recibida correctamente" });
     // Aquí puedes realizar acciones necesarias con el mensaje y el archivo, almacenarlo en una base de datos, etc.
     //res.status(200).json({ success: true, message: 'ds' });
   } else if (objPost.type === 'imatge') {

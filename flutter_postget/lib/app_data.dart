@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_postget/layout_chat.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -55,6 +56,7 @@ class AppData with ChangeNotifier {
         // Procesar la respuesta del servidor
         var responseData = await response.stream.toBytes();
         var responseString = utf8.decode(responseData);
+
         return responseString;
       } else {
         throw Exception(
@@ -63,19 +65,6 @@ class AppData with ChangeNotifier {
     } catch (e) {
       print("Excepción en loadHttpPostByChunks: $e");
       throw e;
-    }
-  }
-
-  // Funcion para enviar al server del chatbot
-  void sendBackend(String textBody, File selectedFile) {
-    if (selectedFile.path.isEmpty) {
-      print("tipus conversa");
-      loadHttpPostByChunks("http://localhost:3000/chat", selectedFile,
-          message: textBody);
-    } else {
-      print("tipus image");
-      loadHttpPostByChunks("http://localhost:3000/chat", selectedFile,
-          message: textBody);
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -122,7 +123,7 @@ class _LayoutChatState extends State<LayoutChat> {
                     ),
                   ),
                   CupertinoButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (messageController.text.isEmpty &&
                           selectedImage.path.isEmpty) {
                         return;
@@ -133,8 +134,12 @@ class _LayoutChatState extends State<LayoutChat> {
                         addMessage(UserType.human, messageController.text,
                             selectedImage);
                       }
-                      appData.sendBackend(
-                          messageController.text, selectedImage);
+                      String response = await appData.loadHttpPostByChunks(
+                          "http://localhost:3000/chat", selectedImage,
+                          message: messageController.text);
+                      final jsonResponse = jsonDecode(response);
+                      final botMessage = jsonResponse['message'];
+                      addMessage(UserType.chatBot, botMessage, null);
                       messageController.clear();
                       removeFile();
                     },
