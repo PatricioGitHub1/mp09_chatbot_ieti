@@ -29,7 +29,8 @@ class _LayoutChatState extends State<LayoutChat> {
   Future<File> pickFile() async {
     FilePickerResult? result;
 
-    result = await FilePicker.platform.pickFiles(dialogTitle: 'prueba', withData: true);
+    result = await FilePicker.platform
+        .pickFiles(dialogTitle: 'prueba', withData: true);
 
     if (result != null) {
       File file = File(result.files.single.path!);
@@ -42,7 +43,6 @@ class _LayoutChatState extends State<LayoutChat> {
   // Funció per carregar l'arxiu seleccionat amb una sol·licitud POST
   Future<void> uploadFile(AppData appData) async {
     try {
-
       appData.selectedImage = await pickFile();
       print('selected file');
     } catch (e) {
@@ -51,7 +51,7 @@ class _LayoutChatState extends State<LayoutChat> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
@@ -121,7 +121,8 @@ class _LayoutChatState extends State<LayoutChat> {
                       if (messageController.text.isEmpty && appData.selectedImage == null) {
                         return;
                       }
-                      MessageBox newBotMessage = MessageBox.textOnly(owner: UserType.chatBot, textContent: "Loading...");
+                      MessageBox newBotMessage = MessageBox.textOnly(
+                          owner: UserType.chatBot, textContent: "Loading...");
                       // esto es para determinar si es tipo conversa o imatge, falta el file picker ...
                       addMessage(UserType.human, messageController.text);
                       if (appData.selectedImage == null) {
@@ -139,11 +140,10 @@ class _LayoutChatState extends State<LayoutChat> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      print('stopping stream of message');
+                      print('stopping stream of message ...');
                       appData.loadingPost = false;
                     },
-                    child:
-                        const Icon(CupertinoIcons.clear_fill),
+                    child: const Icon(CupertinoIcons.clear_fill),
                   ),
                 ],
               ),

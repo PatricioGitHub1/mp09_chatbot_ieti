@@ -82,7 +82,7 @@ class AppData with ChangeNotifier {
     } else {
       request.fields['data'] = '{"type":"conversa", "message":"$body"}';
     }
-    
+
     try {
       var response = await request.send();
 
