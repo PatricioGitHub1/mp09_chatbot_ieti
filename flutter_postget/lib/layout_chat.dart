@@ -104,10 +104,11 @@ class _LayoutChatState extends State<LayoutChat> {
                     onPressed: () async {
                       //print('en botton para enviar img');
                       await uploadFile(appData);
-                      
+                      appData.notifyListeners();
                     },
                     child:
-                        const Icon(CupertinoIcons.photo_fill_on_rectangle_fill),
+                        Icon(CupertinoIcons.photo_fill_on_rectangle_fill,
+                        color: appData.selectedImage != null ? CupertinoColors.activeGreen : CupertinoColors.activeBlue),
                   ),
                   Expanded(
                     child: CupertinoTextField(
@@ -127,6 +128,7 @@ class _LayoutChatState extends State<LayoutChat> {
                         appData.load(messageController.text, newBotMessage);
                       } else {
                         appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
+                        appData.selectedImage = null;
                       }
                       
                       mensajes.add(newBotMessage);
