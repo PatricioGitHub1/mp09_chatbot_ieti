@@ -117,13 +117,17 @@ class _LayoutChatState extends State<LayoutChat> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      if (messageController.text.isEmpty) {
+                      if (messageController.text.isEmpty && appData.selectedImage == null) {
                         return;
                       }
                       MessageBox newBotMessage = MessageBox.textOnly(owner: UserType.chatBot, textContent: "Loading...");
                       // esto es para determinar si es tipo conversa o imatge, falta el file picker ...
                       addMessage(UserType.human, messageController.text);
-                      appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
+                      if (appData.selectedImage == null) {
+                        appData.load(messageController.text, newBotMessage);
+                      } else {
+                        appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
+                      }
                       
                       mensajes.add(newBotMessage);
 

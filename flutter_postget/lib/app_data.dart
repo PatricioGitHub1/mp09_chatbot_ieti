@@ -23,7 +23,7 @@ class AppData with ChangeNotifier {
 
   final ScrollController scrollController = ScrollController();
 
-  late File? selectedImage;
+  File? selectedImage;
 
   void scrollDown() {
     scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -64,7 +64,7 @@ class AppData with ChangeNotifier {
 
   // Funció per fer crides tipus 'POST' amb un arxiu adjunt,
   // i agafar la informació a mida que es va rebent
-  Future<void> loadHttpPostByChunks(String url, String body, MessageBox botMessage,File? file) async {
+  Future<void> loadHttpPostByChunks(String url, String body, MessageBox botMessage,{File? file}) async {
     var completer = Completer<void>();
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
@@ -122,7 +122,7 @@ class AppData with ChangeNotifier {
   void load(String body, MessageBox botMessage, {File? selectedFile}) async {
     loadingPost = true;
     notifyListeners();
-    await loadHttpPostByChunks('http://localhost:3000/data', body, botMessage,selectedFile);
+    await loadHttpPostByChunks('http://localhost:3000/data', body, botMessage,file:  selectedFile);
     loadingPost = false;
     notifyListeners();
   }
