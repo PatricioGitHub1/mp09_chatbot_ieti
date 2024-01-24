@@ -11,6 +11,10 @@ const port = process.env.PORT || 3000
 const storage = multer.memoryStorage(); // Guardarà l'arxiu a la memòria
 const upload = multer({ storage: storage });
 
+function isBlank(str) {
+  return (!str || /^\s*$/.test(str));
+}
+
 // Tots els arxius de la carpeta 'public' estàn disponibles a través del servidor
 // http://localhost:3000/
 // http://localhost:3000/images/imgO.png
@@ -161,16 +165,27 @@ app.post('/data', upload.single('file'), async (req, res) => {
     let fileContent = uploadedFile.buffer.toString('base64');
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
     const url = "http://localhost:11434/api/generate";
-    const data = {"model":"llava", "prompt": objPost.message, "images":[fileContent]};
+    // model
+    var textImagePrompt = objPost.message
+    if (isBlank(textImagePrompt)) {
+      console.log("texto vacio");
+      textImagePrompt =  "describe this image";
+    }
+    const data = {"model":"llava", "prompt": textImagePrompt, "images":[fileContent]};
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 600000);
+    console.log('created timeout controller..');
     fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
+      signal: controller.signal,
     })
       .then(async response => {
+        clearTimeout(timeoutId);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
