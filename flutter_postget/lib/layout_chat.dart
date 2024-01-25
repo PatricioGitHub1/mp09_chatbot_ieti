@@ -97,6 +97,29 @@ class _LayoutChatState extends State<LayoutChat> {
                 ),
               ),
             ),
+            AnimatedContainer(
+              padding: const EdgeInsets.all(10),
+              duration: const Duration(milliseconds: 100),
+              height: appData.selectedImage != null ? 40 : 0,
+              color: CupertinoColors.activeGreen,
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'File Selected',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      appData.selectedImage = null;
+                      appData.notifyListeners();
+                    },
+                    child: const Icon(CupertinoIcons.xmark_circle),
+                  ),
+                ],
+              ),
+            ),
             Container(
               padding: const EdgeInsets.all(8.0),
               color: CupertinoColors.lightBackgroundGray,
