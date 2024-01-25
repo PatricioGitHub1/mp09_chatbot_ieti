@@ -19,6 +19,8 @@ class LayoutChat extends StatefulWidget {
 }
 
 class _LayoutChatState extends State<LayoutChat> {
+  final ScrollController _scrollController = ScrollController();
+
   double windowHeight = 0;
   double windowWidth = 0;
 
@@ -83,10 +85,10 @@ class _LayoutChatState extends State<LayoutChat> {
                 width: windowWidth,
                 color: CupertinoColors.white,
                 child: CupertinoScrollbar(
-                  controller: appData.scrollController,
+                  controller: _scrollController,
                   child: ListView.builder(
                     scrollDirection: Axis.vertical,
-                    controller: appData.scrollController,
+                    controller: _scrollController,
                     itemCount: mensajes.length,
                     itemBuilder: (context, index) {
                       return buildMessageItem(mensajes[index]);
@@ -106,9 +108,10 @@ class _LayoutChatState extends State<LayoutChat> {
                       await uploadFile(appData);
                       appData.notifyListeners();
                     },
-                    child:
-                        Icon(CupertinoIcons.photo_fill_on_rectangle_fill,
-                        color: appData.selectedImage != null ? CupertinoColors.activeGreen : CupertinoColors.activeBlue),
+                    child: Icon(CupertinoIcons.photo_fill_on_rectangle_fill,
+                        color: appData.selectedImage != null
+                            ? CupertinoColors.activeGreen
+                            : CupertinoColors.activeBlue),
                   ),
                   Expanded(
                     child: CupertinoTextField(
@@ -118,20 +121,23 @@ class _LayoutChatState extends State<LayoutChat> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      if (messageController.text.isEmpty && appData.selectedImage == null) {
+                      if (messageController.text.isEmpty &&
+                          appData.selectedImage == null) {
                         return;
                       }
                       MessageBox newBotMessage = MessageBox.textOnly(
                           owner: UserType.chatBot, textContent: "Loading...");
                       // esto es para determinar si es tipo conversa o imatge, falta el file picker ...
-                      addMessage(UserType.human, messageController.text);
+                      addMessage(UserType.human, messageController.text,
+                          appData.selectedImage);
                       if (appData.selectedImage == null) {
                         appData.load(messageController.text, newBotMessage);
                       } else {
-                        appData.load(messageController.text, newBotMessage, selectedFile:  appData.selectedImage);
+                        appData.load(messageController.text, newBotMessage,
+                            selectedFile: appData.selectedImage);
                         appData.selectedImage = null;
                       }
-                      
+
                       mensajes.add(newBotMessage);
 
                       messageController.clear();
@@ -154,9 +160,20 @@ class _LayoutChatState extends State<LayoutChat> {
     );
   }
 
-  void addMessage(UserType owner, String textContent) {
+  void addMessage(UserType owner, String textContent, File? imageContent) {
     setState(() {
+      if (imageContent != null) {
+        mensajes.add(MessageBox(
+            owner: owner,
+            textContent: textContent,
+            image: imageContent,
+            hasImage: true));
+        scrollToEnd();
+        return;
+      }
+
       mensajes.add(MessageBox.textOnly(owner: owner, textContent: textContent));
+      scrollToEnd();
     });
   }
 
@@ -182,11 +199,41 @@ class _LayoutChatState extends State<LayoutChat> {
               Radius.circular(5.0) //                 <--- border radius here
               ),
         ),
-        child: Text(
-          message.textContent,
-          style: CupertinoTheme.of(context).textTheme.textStyle,
-        ),
+        child: message.hasImage
+            ? Column(
+                children: [
+                  Container(
+                    height: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: FileImage(message.image),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message.textContent,
+                    style: CupertinoTheme.of(context).textTheme.textStyle,
+                  ),
+                ],
+              )
+            : Text(
+                message.textContent,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+              ),
       ),
     );
+  }
+
+  void scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    });
   }
 }
