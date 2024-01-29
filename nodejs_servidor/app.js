@@ -1,6 +1,7 @@
 const express = require('express')
 const multer = require('multer');
-const url = require('url')
+const url = require('url');
+const { isNullOrUndefined } = require('util');
 
 var keepStreamAlive;
 
@@ -111,19 +112,7 @@ app.post('/data', upload.single('file'), async (req, res) => {
   // - 'conversa' que retornara una petició generada per 'mistral'
   // - 'imatge' que retornara la interpretació d'una imatge enviada a 'llava'
 
-  if (objPost.type === 'test') {
-    if (uploadedFile) {
-      let fileContent = uploadedFile.buffer.toString('utf-8')
-      console.log('Contingut de l\'arxiu adjunt:')
-      console.log(fileContent)
-    }
-    res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
-    res.write("POST First line\n")
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    res.write("POST Second line\n")
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    res.end("POST Last line\n")
-  } if (objPost.type === 'conversa') {
+  if (objPost.type === 'conversa') {
     console.log("en conversa...");
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=UTF-8' })
     const url = "http://localhost:11434/api/generate";
@@ -143,19 +132,39 @@ app.post('/data', upload.single('file'), async (req, res) => {
         const reader = response.body.getReader();
         keepStreamAlive = true;
         while (keepStreamAlive) {
-          const { done, value } = await reader.read();
-    
-          if (done) {
-            break;
-          }
-          const jsonData = JSON.parse(new TextDecoder().decode(value));
-          console.log(jsonData.response);
-          res.write(jsonData.response);
+            const { done, value } = await reader.read();
+
+            if (done) {
+              break;
+            }
+            
+            if (value != null) {
+              const jsonString = new TextDecoder().decode(value);
+              separatedJsonArray = jsonString.split("\n");
+              console.log('Raw JSON:', jsonString);
+              separatedJsonArray = separatedJsonArray.filter(e => e !== '')
+              console.log(separatedJsonArray);
+
+              if (separatedJsonArray.length > 1) {
+                for (let index = 0; index < separatedJsonArray.length; index++) {
+                  const element = separatedJsonArray[index];
+                  const jsonData = JSON.parse(element);
+                  console.log(jsonData.response);
+                  res.write(jsonData.response);
+                }
+              } else {
+                const jsonData = JSON.parse(jsonString);
+                console.log(jsonData.response);
+                res.write(jsonData.response);
+              }
+              
+            }
+            
         }
 
-        res.end("")
+        res.end("") 
       })
-      
+       
       .catch(error => {
         console.error('Error:', error);
         res.status(400).json({ success: false, error: 'Something went wrong....' });
@@ -177,7 +186,7 @@ app.post('/data', upload.single('file'), async (req, res) => {
     const timeoutId = setTimeout(() => controller.abort(), 600000);
     console.log('created timeout controller..');
     fetch(url, {
-      method: 'POST',
+      method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
       },
@@ -192,17 +201,37 @@ app.post('/data', upload.single('file'), async (req, res) => {
         const reader = response.body.getReader();
         keepStreamAlive = true;
         while (keepStreamAlive) {
-          const { done, value } = await reader.read();
-    
-          if (done) {
-            break;
-          }
-          const jsonData = JSON.parse(new TextDecoder().decode(value));
-          console.log(jsonData.response);
-          res.write(jsonData.response);
+            const { done, value } = await reader.read();
+
+            if (done) {
+              break;
+            }
+
+            if (value != null) {
+              const jsonString = new TextDecoder().decode(value);
+              separatedJsonArray = jsonString.split("\n");
+              console.log('Raw JSON:', jsonString);
+              separatedJsonArray = separatedJsonArray.filter(e => e !== '')
+              console.log(separatedJsonArray);
+
+              if (separatedJsonArray.length > 1) {
+                for (let index = 0; index < separatedJsonArray.length; index++) {
+                  const element = separatedJsonArray[index];
+                  const jsonData = JSON.parse(element);
+                  console.log(jsonData.response);
+                  res.write(jsonData.response);
+                }
+              } else {
+                const jsonData = JSON.parse(jsonString);
+                console.log(jsonData.response);
+                res.write(jsonData.response);
+              }
+              
+            }
+            
         }
 
-        res.end("")
+        res.end("") 
       })
       
       .catch(error => {
